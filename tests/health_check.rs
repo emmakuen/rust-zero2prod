@@ -12,9 +12,15 @@ pub struct TestApp {
 
 // Ensure that the `tracing` stack is only initialized once using `once_cell`
 static TRACING: Lazy<()> = Lazy::new(|| {
-    // initialize tracing
-    let subscriber = get_subscriber("test".into(), "debug".into());
-    init_subscriber(subscriber);
+    let default_filter_level = "info".to_string();
+    let subscriber_name = "test".to_string();
+    if std::env::var("TEST_LOG").is_ok() {
+        let subscriber = get_subscriber(subscriber_name, default_filter_level, std::io::stdout);
+        init_subscriber(subscriber);
+    } else {
+        let subscriber = get_subscriber("test".into(), "debug".into(), std::io::sink);
+        init_subscriber(subscriber);
+    }
 });
 
 // launch app in the background
